@@ -102,8 +102,8 @@ func lzcnt(x uint64) int {
 		return Size
 	}
 	// x: 000010010
-	//   PopCount(x) - 1 => 1
-	//   Select1(x, 1)   => 4
+	//   Count(x) - 1  => 1
+	//   Select1(x, 1) => 4
 	return (Size - 1) - select9(x, Count(x)-1)
 }
 

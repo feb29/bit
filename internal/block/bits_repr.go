@@ -1,4 +1,4 @@
-package bitmap
+package block
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 )
 
 type (
-	array []uint16
-	block []uint64
+	array  []uint16
+	bitmap []uint64
 )
 
 func (a array) Len() int           { return len(a) }
@@ -31,17 +31,17 @@ func (a *array) Pop() interface{} {
 	return x
 }
 
-func (b block) Len() int           { return len(b) }
-func (b block) Less(i, j int) bool { return b[i] < b[j] }
-func (b block) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
+func (b bitmap) Len() int           { return len(b) }
+func (b bitmap) Less(i, j int) bool { return b[i] < b[j] }
+func (b bitmap) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 
 // Push implements heap.Interface
-func (b *block) Push(x interface{}) {
+func (b *bitmap) Push(x interface{}) {
 	*b = append(*b, touint64(x))
 }
 
 // Pop implements heap.Interface
-func (b *block) Pop() interface{} {
+func (b *bitmap) Pop() interface{} {
 	old := *b
 	n := len(old)
 	x := old[n-1]
@@ -85,23 +85,23 @@ func imask(x uint16) (int, uint64) {
 	return int(x) / bit.Size, 1 << (uint64(x) % bit.Size)
 }
 
-func (b block) check(i int, mask uint64) bool {
+func (b bitmap) check(i int, mask uint64) bool {
 	return b[i]&mask != 0
 }
 
-func (b *block) test(x uint16) bool {
+func (b *bitmap) test(x uint16) bool {
 	i, mask := imask(x)
 	return b.check(i, mask)
 }
 
-func (b *block) insert(x uint16) bool {
+func (b *bitmap) insert(x uint16) bool {
 	i, mask := imask(x)
 	if b.check(i, mask) {
 		return false
 	}
 	set, l := *b, len(*b)
 	if i >= l {
-		set = make(block, i+1, blockcap(cap(*b)*2))
+		set = make(bitmap, i+1, blockcap(cap(*b)*2))
 		copy(set, (*b)[:l])
 	}
 	set[i] |= mask
@@ -116,7 +116,7 @@ func blockcap(cap int) int {
 	return math.MaxUint16 >> bit.Log2
 }
 
-func (b *block) remove(x uint16) bool {
+func (b *bitmap) remove(x uint16) bool {
 	i, mask := imask(x)
 	if !b.check(i, mask) {
 		return false
@@ -125,21 +125,21 @@ func (b *block) remove(x uint16) bool {
 	return true
 }
 
-func (b block) count() (c int) {
+func (b bitmap) count() (c int) {
 	for _, x := range b {
 		c += bit.Count(x)
 	}
 	return
 }
 
-func (b block) density() float64 {
+func (b bitmap) density() float64 {
 	if b == nil {
 		return 0
 	}
 	return float64(b.count()) / float64(len(b)*bit.Size)
 }
 
-func (b block) rank1(i int) (c int) {
+func (b bitmap) rank1(i int) (c int) {
 	if i <= 0 {
 		return 0
 	}
@@ -153,11 +153,11 @@ func (b block) rank1(i int) (c int) {
 	return
 }
 
-func (b block) rank0(i int) (c int) {
+func (b bitmap) rank0(i int) (c int) {
 	return i - b.rank1(i)
 }
 
-func (b block) select1(c int) int {
+func (b bitmap) select1(c int) int {
 	for i, x := range b {
 		w := bit.Count(x)
 		if c-w < 0 {
@@ -168,7 +168,7 @@ func (b block) select1(c int) int {
 	return -1
 }
 
-func (b block) select0(c int) int {
+func (b bitmap) select0(c int) int {
 	for i, x := range b {
 		w := bit.Count(^x)
 		if c-w < 0 {
@@ -179,7 +179,7 @@ func (b block) select0(c int) int {
 	return -1
 }
 
-func (b block) selectSearch(c int) int {
+func (b bitmap) selectSearch(c int) int {
 	i := sort.Search(len(b)*bit.Size, func(i int) bool {
 		return b.rank1(i) > c
 	}) - 1

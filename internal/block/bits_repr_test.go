@@ -1,4 +1,4 @@
-package bitmap
+package block
 
 import (
 	"math"
@@ -11,8 +11,8 @@ import (
 
 func init() { rand.Seed(time.Now().UnixNano()) }
 
-func generate(size int) block {
-	xs := make(block, size)
+func generate(size int) bitmap {
+	xs := make(bitmap, size)
 	for i := 0; i < size; i++ {
 		xs[i] = bit.Rand64()
 	}
@@ -44,11 +44,11 @@ func TestBlockRankSelect(t *testing.T) {
 func TestBlockSelect1(t *testing.T) {
 	table := []struct {
 		cnt   int
-		cases map[int]block
+		cases map[int]bitmap
 	}{
 		{
 			1,
-			map[int]block{
+			map[int]bitmap{
 				-1:  {0, 0, 0, 0, 1},
 				192: {1, 0, 0, 1, 1},
 				1:   {3, 0, 1, 0, 3},

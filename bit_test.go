@@ -61,11 +61,11 @@ func TestSelect1(t *testing.T) {
 }
 
 func TestProperties(t *testing.T) {
-	t.Run("RankMaxSizeEqualsToPopCount", func(*testing.T) {
+	t.Run("RankMaxSizeEqualsToCount", func(*testing.T) {
 		for i := 0; i < 1000; i++ {
 			w := bit.Rand64()
 			if bit.Count(w) != bit.Rank1(w, bit.Size) {
-				t.Errorf("expect: PopCount(w) == Rank1(w, Size)")
+				t.Errorf("expect: Count(w) == Rank1(w, Size)")
 			}
 		}
 	})
