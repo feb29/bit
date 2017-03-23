@@ -1,3 +1,3 @@
 package bit
 
-func POPCNT(x uint64) uint64
+func popcnt(x uint64) uint64

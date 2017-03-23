@@ -80,21 +80,6 @@ func TestProperties(t *testing.T) {
 	})
 }
 
-func BenchmarkCount(b *testing.B) {
-	w := bit.Rand64()
-	b.ResetTimer()
-	b.Run("GO", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			bit.Count(w)
-		}
-	})
-	b.Run("ASM", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			bit.POPCNT(w)
-		}
-	})
-}
-
 func BenchmarkRank(b *testing.B) {
 	w := bit.Rand64()
 	k := rand.Intn(bit.Size)
