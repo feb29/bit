@@ -93,7 +93,7 @@ func Rank0Slice(ws []uint64, i int) int {
 // Select1 return 'c+1'th non-zero bit index, or return SelectNotFound.
 func Select1(x uint64, c int) int { return select9(x, c) }
 
-// Select1 return 'c+1'th zero bit index, or return SelectNotFound.
+// Select0 return 'c+1'th zero bit index, or return SelectNotFound.
 func Select0(x uint64, c int) int { return select9(^x, c) }
 
 // lzcnt count leading zeros.
