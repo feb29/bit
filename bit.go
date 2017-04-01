@@ -42,7 +42,7 @@ func select9(x uint64, c int) int {
 	s1 := s0&ox33 + s0>>2&ox33
 	s2 := (s1 + s1>>4) & ox0f * ox01
 	p0 := le8(s2, uint64(c*ox01)) >> 7 * ox01
-	p1 := int(p0) >> 53 & ^b111
+	p1 := int(p0>>53) & ^b111
 	p2 := uint(p1)
 	p3 := s2 << uint(8) >> p2
 	p4 := uint64(c) - p3&uint64(oxff)
@@ -51,8 +51,8 @@ func select9(x uint64, c int) int {
 	return p1 + int(p5)
 }
 
-func le8(x, y uint64) uint64 { return (uint64(y|x8 - x & ^x8) ^ x ^ y) & x8 }
-func lt8(x, y uint64) uint64 { return (uint64(x|x8 - y & ^x8) ^ x ^ ^y) & x8 }
+func le8(x, y uint64) uint64 { return ((y | x8 - x & ^x8) ^ x ^ y) & x8 }
+func lt8(x, y uint64) uint64 { return ((x | x8 - y & ^x8) ^ x ^ ^y) & x8 }
 
 // Count counts non-zero bits in w
 func Count(x uint64) int {
