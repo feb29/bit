@@ -82,7 +82,7 @@ func (a *array) remove(x uint16) bool {
 }
 
 func imask(x uint16) (int, uint64) {
-	return int(x) / bit.Size, 1 << (uint64(x) % bit.Size)
+	return int(x) >> bit.Size, 1 << (uint64(x) % bit.Size)
 }
 
 func (b bitmap) check(i int, mask uint64) bool {
