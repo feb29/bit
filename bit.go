@@ -1,11 +1,12 @@
 package bit
 
 const (
+	// Size is a uint64's bit size
 	Size = 64
-	Log2 = 6 // x>>Log2 == x/64
+	log2 = 6 // x>>Log2 == x/64
 
-	// SelectNotFound is error value on Select1|Select0 failed.
-	SelectNotFound = 72
+	// selectNotFound is error value on Select1|Select0 failed.
+	selectNotFound = 72
 )
 
 const (
@@ -62,39 +63,52 @@ func Count(x uint64) int {
 	return int((x * ox01) >> 56)
 }
 
-func CountSlice(ws []uint64) (k int) {
-	for _, w := range ws {
-		k += Count(w)
-	}
-	return
-}
-
-// Rank1 counts non-zero bits in w[0:index]
+// Rank1 counts non-zero bits in w[0:i].
+// Rank1(w, Size) is equal to Count(w).
 func Rank1(w uint64, i int) int { return rank9(w, i) }
 
-// Rank0 counts zero bits in w[0:index]
+// Rank0 counts zero bits in w[0:i]
 func Rank0(w uint64, i int) int { return rank9(^w, i) }
 
-func Rank1Slice(ws []uint64, i int) (c int) {
-	q, r := i/Size, i%Size
-	if q > 0 {
-		c += CountSlice(ws[0:q])
+// Select1 return 'c+1'th non-zero bit index, or return -1.
+func Select1(x uint64, c int) int {
+	i := select9(x, c)
+	if i == selectNotFound {
+		return -1
 	}
-	if len(ws) > q {
-		c += Rank1(ws[q], r)
-	}
-	return
+	return i
 }
 
-func Rank0Slice(ws []uint64, i int) int {
-	return i - Rank1Slice(ws, i)
+// Select0 return 'c+1'th zero bit index, or return -1.
+func Select0(x uint64, c int) int {
+	i := select9(^x, c)
+	if i == selectNotFound {
+		return -1
+	}
+	return i
 }
 
-// Select1 return 'c+1'th non-zero bit index, or return SelectNotFound.
-func Select1(x uint64, c int) int { return select9(x, c) }
+func select1Slice(xs []uint64, c int) int {
+	for i, x := range xs {
+		w := Count(x)
+		if c-w < 0 {
+			return Size*i + Select1(x, c)
+		}
+		c = c - w
+	}
+	return -1
+}
 
-// Select0 return 'c+1'th zero bit index, or return SelectNotFound.
-func Select0(x uint64, c int) int { return select9(^x, c) }
+func select0Slice(xs []uint64, c int) int {
+	for i, x := range xs {
+		w := Count(^x)
+		if c-w < 0 {
+			return Size*i + Select0(x, c)
+		}
+		c = c - w
+	}
+	return -1
+}
 
 // lzcnt count leading zeros.
 func lzcnt(x uint64) int {
